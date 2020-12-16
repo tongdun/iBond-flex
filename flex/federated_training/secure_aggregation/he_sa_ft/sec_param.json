@@ -1,0 +1,5 @@
+{
+    "he_algo": "paillier",
+    "he_key_length": 1024,
+    "key_exchange_size": 2048
+}

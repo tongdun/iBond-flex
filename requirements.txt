@@ -1,0 +1,12 @@
+numpy==1.18.5
+pandas==1.0.5
+pytest==6.1.2
+py_ecc==5.0.0
+matplotlib==3.2.2
+gmpy2==2.0.8
+pycryptodome==3.9.9
+pycryptodomex==3.9.9
+scikit_learn==0.23.2
+secrets==1.0.2
+torch==1.6.0
+tensorflow==2.2.0
