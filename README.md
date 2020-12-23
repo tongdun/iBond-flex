@@ -1,3 +1,5 @@
+[中文](README_zh.md)
+
 FLEX (Federated Learning Exchange) protocol is a set of standardized federal learning agreements designed by Tongdun AI Research Group. FLEX protocol sets the sequence of data exchange during the federal learning process between participants and methods for data encryption and decryption used before and after the exchange. Abiding by these agreements, participants can safely join the federation for providing data or federated services.
 
 FLEX protocol consists of two parts:
