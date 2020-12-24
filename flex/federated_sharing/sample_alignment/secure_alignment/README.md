@@ -6,7 +6,7 @@
         1. Diffie-Hellman密钥交换协议;  
         2. AES对称加密;
     * 算法流程图  
-        ![FLEX](../../../../doc/pic/secure alignment.png)
+        ![FLEX](../../../../doc/pic/secure_alignment.png)
     * 安全要求: 
         1. 参与方不能知道其它方的用户ID，也不能泄漏交集外的用户样本信息;
         2. 第三方不能知道甚至追溯到参与方的用户ID数据.

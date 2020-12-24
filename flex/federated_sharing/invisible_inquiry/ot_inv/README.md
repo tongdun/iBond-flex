@@ -8,7 +8,7 @@
         1. 不经意传输协议(oblivious transfer protocol),具体参考[OT](../../../crypto/oblivious_transfer/README.md);  
         2. AES对称加密;
     * 算法流程图  
-        ![FLEX](../../../../doc/pic/invisible inquiry.png)
+        ![FLEX](../../../../doc/pic/invisible_inquiry.png)
     * 安全要求:  
         1.查询请求方只能获得查询ID对应的查询结果，不能获得其它额外信息;  
         2.服务方不能直接知道查询ID，但允许以某个概率猜出查询ID.
