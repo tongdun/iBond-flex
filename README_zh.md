@@ -1,6 +1,6 @@
 # FLEX
 
-[英文版请参考页面](README.md)
+[英文版链接](README.md)
 
 FLEX(Federated Learning EXchange，FLEX)是同盾科技AI研究院为知识联邦体系设计并打造的一套标准化的联邦协议。
 FLEX协议约定了联邦过程中参与方之间的数据交换顺序，以及在交换前后采用的数据加解密方法。只要参与各方能够遵守这些约定，
@@ -12,8 +12,11 @@ FLEX协议包括两层：
 2. 公共组件：是上层应用协议所依赖的基础密码算法和安全协议，比如同态加密、秘密分享等。
 
 <div style="text-align: center;">
+<br>
 
 ![FLEX协议总览](doc/pic/FLEX-structure-zh.png)
+
+FLEX协议总览
 </div>
 
 本项目实现了FLEX白皮书中的应用协议和公共组件，其中通信接口使用同盾科技AI研究院自研的Ionic Bond协议接口，本项目仅给出了一种简单实现作为参考。
