@@ -1,4 +1,8 @@
-# FLEX
+<div>
+
+![FLEX logo](doc/pic/FLEX_logo.png)
+
+<div>
 
 [英文版链接](README.md)
 
