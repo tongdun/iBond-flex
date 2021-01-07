@@ -43,12 +43,12 @@ class HELRFPCoord(BaseProtocol):
         # step1,get pk, get [u1]
         self.encryptor = self.variable_chan_guest_coordinator.recv(tag='pub_key')
 
+        # step2: send pk to P2
+        self.variable_chan_host_coordinator.send(self.encryptor, tag='pub_key')
+
     def exchange(self, *args, **kwargs):
         # step1： C receiver u1
         enc_u1 = self.variable_chan_guest_coordinator.recv(tag='enc_u1')
-
-        # step2: send pk to P2
-        self.variable_chan_host_coordinator.send(self.encryptor, tag='pub_key')
 
         # step4:
         enc_u2 = self.variable_chan_host_coordinator.recv(tag='enc_u2')
