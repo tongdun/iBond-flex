@@ -1,14 +1,14 @@
-import os
-import json
-
-from flex.tools.ionic import commu
+from flex.cores.commu_model import commu
 from flex.crypto.key_exchange.api import make_agreement
 from test.fed_config_example import fed_conf_guest
 
 
 if __name__ == '__main__':
+    # inits communication
     commu.init(fed_conf_guest)
-
-    k = make_agreement(remote_id='zhibang-d-014010', key_size=2048)
+    remote_id = ["zhibang-d-011040", "zhibang-d-011041", "zhibang-d-011042"]
+    local_id = "zhibang-d-011041"
+    # n-party key exchange
+    k = make_agreement(remote_id=remote_id, local_id=local_id, key_length=2048)
     print(k)
 

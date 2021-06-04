@@ -1,0 +1,153 @@
+#
+#  Copyright 2020 The FLEX Authors. All Rights Reserved.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+#
+
+import math
+from typing import Dict, List
+
+import numpy as np
+import pandas as pd
+
+from flex.cores.encrypt_model import EncryptModel
+
+
+class Bin(object):
+    """
+    in this method we change origin data to bins
+    all bin's message return to dict
+    """
+
+    def __init__(self):
+        self.bin_result = dict()
+        self.bin_hist = dict()
+
+    def get_bin_hist(self,
+                     feature: pd.Series,
+                     split_info: Dict) -> None:
+        """
+            if feature's type is consequent, get binning histogram results.
+        """
+        self.bin_hist['split_points'] = split_info.get('split_points')
+        self.trans_bin_dict(feature)
+        self.bin_result['index'] = self.bin_hist['index']
+        self.bin_result['data'] = self.bin_hist['data']
+        self.bin_result['split_points'] = self.bin_hist['split_points']
+
+    def get_discrete_bin(self, feature: pd.Series) -> None:
+        """
+            if feature's type is category, get discrete binning info.
+        """
+        self.bin_result = dict()
+        threshold = list(feature[feature.notnull()].unique())
+        data = feature.values
+        index_list, data_list = [], []
+        for i in threshold:
+            index_list.append(np.where(data == i)[0])
+            data_list.append(np.array([i]))
+        self.bin_result['index'] = index_list
+        self.bin_result['data'] = data_list
+        self.bin_result['splint_points'] = threshold
+
+    def get_nonetype_bin(self, feature: pd.Series) -> None:
+        """
+            func handles the situation which feature exists missing values.
+        """
+        data = feature[feature.isnull()]
+        self.bin_result['index'].append(np.array(data.index))
+        self.bin_result['data'].append(None)
+
+    def label_count(self, label: np.ndarray) -> [int, int]:
+        """
+            calc good and bad nums of label.
+        """
+        bad_all_count = sum(label)
+        good_all_count = len(label) - sum(label)
+        return good_all_count, bad_all_count
+
+    def trans_bin_dict(self, data: pd.Series) -> None:
+        """
+        Args:
+            data: input data
+
+        Returns: update bin hist mess
+        """
+        self.bin_hist['index'] = []
+        self.bin_hist['data'] = []
+        edges = self.bin_hist['split_points']
+        for i, value in enumerate(edges):
+            if i != 0:
+                value_l = self.bin_hist['split_points'][i - 1]
+                value_r = self.bin_hist['split_points'][i]
+                func = lambda x: value_l < x <= value_r
+            else:
+                # data value less than min value
+                value_j = self.bin_hist['split_points'][0]
+                func = lambda x: x <= value_j
+            index_f = data[data.apply(func)]
+            self.bin_hist['data'].append(index_f.values.reshape(1, -1)[0])
+            self.bin_hist['index'].append(np.array(index_f.index))
+        # data value more than max value
+        value_e = self.bin_hist['split_points'][-1]
+        func = lambda x: x > value_e
+        index_f = data[data.apply(func)]
+        self.bin_hist['data'].append(index_f.values.reshape(1, -1)[0])
+        self.bin_hist['index'].append(np.array(index_f.index))
+
+
+class HeteroBin(Bin):
+    def __init__(self):
+        super(HeteroBin, self).__init__()
+
+    def en_good_bad_calc(self, label: np.ndarray) -> [List, List]:
+        """
+            host calc good/bad num value when label is encrypted.
+        """
+        good_num = bad_num = []
+        for i in self.bin_result['index']:
+            bad_num.append(sum(label[i]))
+            good_num.append(len(i) - sum(label[i]))
+        # list to numpy
+        good_num = np.array(good_num)
+        bad_num = np.array(bad_num)
+        return good_num, bad_num
+
+    def calc_woe_iv(self,
+                    y: np.ndarray,
+                    en_good_num: List,
+                    en_bad_num: List,
+                    decryptor: EncryptModel,
+                    adjust_value: float) -> [List, List]:
+        """
+            guest calculates the iv and woe value.
+        """
+        # num of positive/negative samples
+        good_all_count, bad_all_count = self.label_count(y)
+        woe_value = iv = []
+        good_num = [decryptor.decrypt(good_num_value) for good_num_value in en_good_num]
+        bad_num = [decryptor.decrypt(bad_num_value) for bad_num_value in en_bad_num]
+        for i, good_num_value in enumerate(good_num):
+            # calc woe value
+            if good_num_value == 0 or bad_num[i] == 0:
+                calc_value = math.log((bad_num[i] / bad_all_count + adjust_value) /
+                                      (good_num_value / good_all_count + adjust_value))
+            else:
+                calc_value = math.log((bad_num[i] / bad_all_count) /
+                                      (good_num_value / good_all_count))
+            woe_value.append(calc_value)
+            # calc iv value
+            iv.append(((bad_num[i] / bad_all_count) -
+                       (good_num_value / good_all_count)) * calc_value)
+        return woe_value, iv
+

@@ -16,7 +16,7 @@
 
 
 from flex.crypto.oblivious_transfer.api import make_ot_protocol
-from flex.tools.ionic import commu
+from flex.cores.commu_model import commu
 from test.fed_config_example import fed_conf_host
 
 

@@ -15,10 +15,12 @@
 #
 
 import secrets
+from typing import List
 
 from gmpy2 import powmod
 
-from flex.tools.ionic import VariableChannel
+from flex.cores.commu_model import make_variable_channel
+from flex.utils import ClassMethodAutoLog
 
 
 class DiffieHellman(object):
@@ -27,14 +29,16 @@ class DiffieHellman(object):
     Parties will get the same secret key when the protocol is finished.
     Reference from RFC 7919.
     """
-    def __init__(self, key_size: int = 2048):
+    @ClassMethodAutoLog()
+    def __init__(self, key_length: int = 2048) -> None:
         """
         Set expected key length.
+
         Args:
-            key_size: int, key length
+            key_length: int, key length, must in [2048, 3072, 4096, 6144, 8192]
         """
-        self.key_sizes = [2048, 3072, 4096, 6144, 8192]
-        self.primes = [
+        self.key_lengths = [2048, 3072, 4096, 6144, 8192]
+        primes = [
             'FFFFFFFF FFFFFFFF ADF85458 A2BB4A9A AFDC5620 273D3CF1'
             'D8B9C583 CE2D3695 A9E13641 146433FB CC939DCE 249B3EF9'
             '7D2FE363 630C75D8 F681B202 AEC4617A D3DF1ED5 D5FD6561'
@@ -165,33 +169,72 @@ class DiffieHellman(object):
             'D68C8BB7 C5C6424C FFFFFFFF FFFFFFFF'
             ]
 
-        self.dic = dict(zip(self.key_sizes, self.primes))
+        dic = dict(zip(self.key_lengths, primes))
 
-        if key_size not in self.key_sizes:
-            for s in self.key_sizes:
-                if key_size > s:
-                    print(f"Warning: expected key size is {key_size} but supported key size is {s}.")
-                    key_size = s
-                    break
+        # check key length
+        self._check_key_length(key_length)
 
-        self.p = int(self.dic.get(key_size).replace(' ', ''), 16)
-        self.g = 2
+        self.prime = int(dic.get(key_length).replace(' ', ''), 16)
+        self.generator = 2
 
         self.secrets_generator = secrets.SystemRandom()
 
-    def key_exchange(self, remote_id: str):
+    @ClassMethodAutoLog()
+    def _check_key_length(self, key_length: int):
         """
+        check key length in [2048, 3072, 4096, 6144, 8192].
+        Args:
+            key_length: int, key length, must in [2048, 3072, 4096, 6144, 8192]
+        """
+        if key_length not in self.key_lengths:
+            for s in self.key_lengths:
+                if key_length > s:
+                    print(f"Warning: expected key size is {key_length} but supported key size is {s}.")
+                    key_length = s
+                    break
+
+    @ClassMethodAutoLog()
+    def key_exchange(self, remote_id: List, local_id: str) -> int:
+        """
+        N-party key exchange protocol.
 
         Args:
-            remote_id: str, remote ID which is configured in route table.
+            remote_id: list, remote ID which is configured in route table.
+            local_id: str, local ID.
+        Returns:
+            int, secret key
 
-        Returns: secret key
+        -----
 
+        **Example:**
+
+        >>>remote_id = ["zhibang-d-011040", "zhibang-d-011041", "zhibang-d-011042"]
+        >>>local_id = "zhibang-d-011040"
+        >>>secret_key = make_agreement(remote_id=remote_id, local_id=local_id, key_length=2048)
         """
-        var_chan = VariableChannel(name='diffie_hellman', remote_id=remote_id)
+        # sort the remote_id list to init channel
+        local_index = remote_id.index(local_id)
+        sorted_list = remote_id[local_index:] + remote_id[:local_index]
 
-        a = self.secrets_generator.randint(1, self.p - 1)
-        g_power_a = powmod(self.g, a, self.p)
-        g_power_b = var_chan.swap(g_power_a)
-        secret_key = int(powmod(g_power_b, a, self.p))
+        # inits communication
+        next_chan = make_variable_channel(name='diffie_hellman', endpoint1=local_id, endpoint2=sorted_list[1])
+        prev_chan = make_variable_channel(name='diffie_hellman', endpoint1=local_id, endpoint2=sorted_list[-1])
+
+        # get a random int
+        rand = self.secrets_generator.randint(1, self.prime - 1)
+
+        # send g^rand mod prime to next party
+        g_power_a = powmod(self.generator, rand, self.prime)
+        next_chan.send(g_power_a)
+
+        # receive the intermediate result from prev party and calculate power rand to next party
+        for i in range(len(remote_id) - 2):
+            g_power_prev = prev_chan.recv()
+            g_power_next = powmod(g_power_prev, rand, self.prime)
+            next_chan.send(g_power_next)
+
+        # calculate secret key
+        g_power_prev = prev_chan.recv()
+        secret_key = int(powmod(g_power_prev, rand, self.prime))
+
         return secret_key

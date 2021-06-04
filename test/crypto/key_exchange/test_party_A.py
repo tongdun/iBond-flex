@@ -15,18 +15,23 @@
 #
 
 
-from flex.tools.ionic import commu
+from flex.cores.commu_model import commu
 from flex.crypto.key_exchange.api import make_agreement
-from flex.tools.ionic import make_variable_channel
+from flex.cores.commu_model import make_variable_channel
 from test.fed_config_example import fed_conf_host
 
 
 def test_key_exchange():
+    # inits communication
     commu.init(fed_conf_host)
     var_chan = make_variable_channel('test_key_exchange', fed_conf_host["federation"]["host"][0],
                                      fed_conf_host["federation"]["guest"][0])
 
+    remote_id = ["zhibang-d-011040", "zhibang-d-011041"]
+    local_id = "zhibang-d-011040"
+
+    # do key exchange
     for times in range(5):
         for each in [2048, 3072, 4096, 6144, 8192]:
-            k = make_agreement(remote_id='zhibang-d-014011', key_size=each)
+            k = make_agreement(remote_id=remote_id, local_id=local_id, key_length=each)
             var_chan.send(k, tag="k")

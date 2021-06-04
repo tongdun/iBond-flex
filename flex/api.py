@@ -13,104 +13,141 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
+
+from typing import Dict, Optional, List
+
 from flex.constants import *
+from flex.utils import ClassMethodAutoLog
 
 
-def make_protocol(protocol_name: str, federal_info: dict, sec_param: dict, algo_param: dict = None):
+@ClassMethodAutoLog()
+def make_protocol(protocol_name: str,
+                  federal_info: Dict,
+                  sec_param: List = None,
+                  algo_param: Optional[Dict] = None):
     session = federal_info.get("session")
     role = session.get("role")
     identity = session.get("identity")
 
-    # federated_prediction: logistic_regression
-    if protocol_name == HE_LR_FP:
-        from .federated_prediction.logistic_regression.he_lr_fp.predict import HELRFPCoord, HELRFPGuest, HELRFPHost
-        if role == COORD:
-            return HELRFPCoord(federal_info, sec_param)
-        if role == GUEST:
-            return HELRFPGuest(federal_info, sec_param)
-        if role == HOST:
-            return HELRFPHost(federal_info, sec_param)
-        raise ValueError(f"Role {role} is not supported in {protocol_name} protocol.")
+    # ================  computing  ===================
+    # computing: multi_loan
+    if protocol_name == HE_ML:
+        from .computing.multi_loan.he_ml.compute import HEMLCoord, HEMLGuest, HEMLHost
 
-    # federated_preprocessing: federated_feature_selection
-    if protocol_name == IV_FFS:
-        from .federated_preprocessing.federated_feature_selection.iv_ffs.compute import IVFFSGuest, IVFFSHost
-        if role == GUEST:
-            return IVFFSGuest(federal_info, sec_param, algo_param)
-        if role == HOST:
-            return IVFFSHost(federal_info, sec_param, algo_param)
-        raise ValueError(f"Role {role} is not supported in {protocol_name} protocol.")
+        all_class = {"guest": HEMLGuest, "host": HEMLHost, 'coordinator': HEMLCoord}
 
-    # federated_sharing: invisible_inquiry
-    if protocol_name == OT_INV:
-        from .federated_sharing.invisible_inquiry.ot_inv.inquiry import OTINVServer, OTINVClient
-        if identity == SERVER:
-            return OTINVServer(federal_info, sec_param, algo_param)
-        if identity == CLIENT:
-            return OTINVClient(federal_info, sec_param, algo_param)
-        raise ValueError(f"Role {role} is not supported in {protocol_name} protocol.")
+    elif protocol_name == SS_ML:
+        from .computing.multi_loan.ss_ml.compute import SSMLCoord, SSMLGuest, SSMLHost
 
-    # federated_sharing: sample_alignment
-    if protocol_name == SAL:
-        from .federated_sharing.sample_alignment.secure_alignment.align import SALCoord, SALGuest, SALHost
-        if role == COORD:
-            return SALCoord(federal_info, sec_param, algo_param)
-        if role == GUEST:
-            return SALGuest(federal_info, sec_param, algo_param)
-        if role == HOST:
-            return SALHost(federal_info, sec_param, algo_param)
-        raise ValueError(f"Role {role} is not supported in {protocol_name} protocol.")
+        all_class = {"guest": SSMLGuest, "host": SSMLHost, 'coordinator': SSMLCoord}
 
-    # federated_training: linear_regression
-    if protocol_name == HE_LINEAR_FT:
-        from .federated_training.linear_regression.he_linear_ft.train import HELinearFTCoord, HELinearFTGuest, \
+    elif protocol_name == SS_COMPUTE:
+        from .computing.ss_computing.compute_host import SSComputeHost
+        from .computing.ss_computing.compute_guest import SSComputeGuest
+        from .computing.ss_computing.compute_coord import SSComputeCoord
+
+        all_class = {"guest": SSComputeGuest, "coordinator": SSComputeCoord, "host": SSComputeHost}
+
+    elif protocol_name == OTP_STATS:
+        from .computing.stats.otp_stats.otp_statistic import OTPStatisticGuest
+        from .computing.stats.otp_stats.otp_statistic import OTPStatisticCoord
+
+        all_class = {"guest": OTPStatisticGuest, "coordinator": OTPStatisticCoord}
+
+    # ================  prediction  ===================
+    # prediction: logistic_regression
+    elif protocol_name == HE_LR_FP:
+        from .prediction.logistic_regression.he_lr_fp.predict import HELRFPCoord, HELRFPGuest, HELRFPHost
+
+        all_class = {"guest": HELRFPGuest, "host": HELRFPHost, 'coordinator': HELRFPCoord}
+
+    elif protocol_name == HE_LR_FP2:
+        from flex.prediction.logistic_regression.he_lr_fp2.predict import HELRFPGuest, HELRFPHost
+
+        all_class = {"guest": HELRFPGuest, "host": HELRFPHost}
+
+    # factorization machines
+    elif protocol_name == HE_FM_FP:
+        from flex.prediction.factorization_machines.he_fm_fp.predict import HEFMFPHost, HEFMFPGuest
+
+        all_class = {"guest": HEFMFPGuest, "host": HEFMFPHost}
+
+    # ================  preprocessing  ===================
+    # binning
+    elif protocol_name == HE_DT_FB:
+        from .preprocessing.binning.he_dt_fb.guest import HEDTFBGuest
+        from .preprocessing.binning.he_dt_fb.host import HEDTFBHost
+
+        all_class = {"guest": HEDTFBGuest, "host": HEDTFBHost}
+
+    # feature_selection
+    # IV
+    elif protocol_name == IV_FFS:
+        from .preprocessing.feature_selection.iv_ffs.guest import IVFFSGuest
+        from .preprocessing.feature_selection.iv_ffs.host import IVFFSHost
+
+        all_class = {"guest": IVFFSGuest, "host": IVFFSHost}
+
+    # ================  sharing  ===================
+    # invisible_inquiry
+    elif protocol_name == OT_INV:
+        from .sharing.invisible_inquiry.ot_inv.inquiry import OTINVServer, OTINVClient
+
+        all_class = {"server": OTINVServer, "client": OTINVClient}
+
+        my_class = all_class[identity]
+        return my_class(federal_info, sec_param, algo_param)
+
+    # sample_alignment
+    elif protocol_name == BF_SF:
+        from .sharing.sample_alignment.sample_filtering.filter import BFSFCoord, BFSFParty
+
+        all_class = {"guest": BFSFParty, "host": BFSFParty, 'coordinator': BFSFCoord}
+
+    elif protocol_name == SAL:
+        from .sharing.sample_alignment.secure_alignment.align import SALCoord, SALParty
+
+        all_class = {"guest": SALParty, "host": SALParty, 'coordinator': SALCoord}
+
+    # ================  training  ===================
+    # linear_regression
+    elif protocol_name == HE_LINEAR_FT:
+        from .training.linear_regression.he_linear_ft.train import HELinearFTCoord, HELinearFTGuest, \
             HELinearFTHost
-        if role == COORD:
-            return HELinearFTCoord(federal_info, sec_param)
-        if role == GUEST:
-            return HELinearFTGuest(federal_info, sec_param)
-        if role == HOST:
-            return HELinearFTHost(federal_info, sec_param)
-        raise ValueError(f"Role {role} is not supported in {protocol_name} protocol.")
 
-    # federated_training: logistic_regression
-    if protocol_name == HE_OTP_LR_FT1:
-        from .federated_training.logistic_regression.he_otp_lr_ft1.train import HEOTPLR1Guest, HEOTPLR1Host
-        if role == GUEST:
-            return HEOTPLR1Guest(federal_info, sec_param)
-        if role == HOST:
-            return HEOTPLR1Host(federal_info, sec_param)
-        raise ValueError(f"Role {role} is not supported in {protocol_name} protocol.")
+        all_class = {"guest": HELinearFTGuest, "host": HELinearFTHost,
+                     'coordinator': HELinearFTCoord}
 
-    if protocol_name == HE_OTP_LR_FT2:
-        from .federated_training.logistic_regression.he_otp_lr_ft2.train import HEOTPLRCoord, HEOTPLRGuest, HEOTPLRHost
-        if role == COORD:
-            return HEOTPLRCoord(federal_info, sec_param)
-        if role == GUEST:
-            return HEOTPLRGuest(federal_info, sec_param)
-        if role == HOST:
-            return HEOTPLRHost(federal_info, sec_param)
-        raise ValueError(f"Role {role} is not supported in {protocol_name} protocol.")
+    # logistic_regression
+    elif protocol_name == HE_OTP_LR_FT1:
+        from .training.logistic_regression.he_otp_lr_ft1.train import HEOTPLR1Guest, HEOTPLR1Host
 
-    # federated_training: secure_aggregation
-    if protocol_name == HE_SA_FT:
-        from .federated_training.secure_aggregation.he_sa_ft.train import HESAFTCoord, HESAFTGuest, HESAFTHost
-        if role == COORD:
-            return HESAFTCoord(federal_info, sec_param)
-        if role == GUEST:
-            return HESAFTGuest(federal_info, sec_param)
-        if role == HOST:
-            return HESAFTHost(federal_info, sec_param)
-        raise ValueError(f"Role {role} is not supported in {protocol_name} protocol.")
+        all_class = {"guest": HEOTPLR1Guest, "host": HEOTPLR1Host}
 
-    if protocol_name == OTP_SA_FT:
-        from .federated_training.secure_aggregation.otp_sa_ft.train import OTPSAFTCoord, OTPSAFTGuest, OTPSAFTHost
-        if role == COORD:
-            return OTPSAFTCoord(federal_info, sec_param)
-        if role == GUEST:
-            return OTPSAFTGuest(federal_info, sec_param)
-        if role == HOST:
-            return OTPSAFTHost(federal_info, sec_param)
-        raise ValueError(f"Role {role} is not supported in {protocol_name} protocol.")
+    elif protocol_name == HE_OTP_LR_FT2:
+        from .training.logistic_regression.he_otp_lr_ft2.train import HEOTPLRCoord, HEOTPLRGuest, HEOTPLRHost
 
-    raise NotImplementedError(f"Protocol {protocol_name} is not implemented.")
+        all_class = {"guest": HEOTPLRGuest, "host": HEOTPLRHost,
+                     'coordinator': HEOTPLRCoord}
+
+    # neural_network
+    elif protocol_name == OTP_NN_FT:
+        from .training.neural_network.otp_nn_ft.train import OTPNNFTGuest, OTPNNFTHost
+
+        all_class = {"guest": OTPNNFTGuest, "host": OTPNNFTHost}
+
+    elif protocol_name == OTP_SA_FT:
+        from .training.secure_aggregation.otp_sa_ft.train import OTPSAFTCoord, OTPSAFTParty
+
+        all_class = {"guest": OTPSAFTParty, "coordinator": OTPSAFTCoord, "host": OTPSAFTParty}
+
+    # factorization machines
+    elif protocol_name == HE_FM_FT:
+        from flex.training.factorization_machines.he_fm_ft.train import HEFMFTGuest, HEFMFTHost
+
+        all_class = {"guest": HEFMFTGuest, "host": HEFMFTHost}
+
+    else:
+        raise NotImplementedError(f"Protocol {protocol_name} is not implemented.")
+    my_class = all_class[role]
+    return my_class(federal_info, sec_param, algo_param)

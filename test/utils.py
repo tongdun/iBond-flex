@@ -20,12 +20,12 @@ import torch
 
 def almost_equal(x, y, epsilon=1e-4):
     if isinstance(x, (int, float)) and isinstance(y, (int, float)):
-        return (x - y) < epsilon
+        return abs(x - y) < epsilon
     if isinstance(x, np.ndarray) and isinstance(y, np.ndarray) and x.shape == y.shape:
         return np.all(x - y < epsilon)
     if isinstance(x, torch.Tensor) and isinstance(y, torch.Tensor) and x.shape == y.shape:
         return torch.all(x - y < epsilon)
     if isinstance(x, list) and isinstance(y, list) and len(x) == len(y):
-        return [almost_equal(x[i], y[i]) for i in range(len(x))]
+        return np.all([almost_equal(x[i], y[i]) for i in range(len(x))])
     return False
 
