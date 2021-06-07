@@ -105,7 +105,3 @@ atlassian-ide-plugin.xml
 
 # Desktop Services Store
 .DS_Store
-
-# ignore environment depedent configs
-sec_config.py
-
