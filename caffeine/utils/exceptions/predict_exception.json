@@ -1,0 +1,6 @@
+{
+  "NotTrainedError": {
+    "name": "not trained error",
+    "code": "exp_not_trained"
+  }
+}

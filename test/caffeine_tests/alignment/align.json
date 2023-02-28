@@ -1,0 +1,100 @@
+{
+    "name": "data_clean_op_job_2b2fdbb1774411ebb2ea0242ac11c204",
+    "uuid": "data_clean_op_job_2b2fdbb1774411ebb2ea0242ac11c204",
+    "type": "operator",
+    "workflow": [
+        {
+            "parameter": {
+                "general_param": {
+                    "bond_monitor_id": "932",
+                    "bond_web_server_url": "http://10.58.14.13:8089",
+                    "federation_info": {
+                        "role": {
+                            "host": [
+                                "10000"
+                            ],
+                            "guest": [
+                                "10001"
+                            ],
+                            "coordinator": [
+                                "9999"
+                            ]
+                        },
+                        "local": {
+                            "role": "host",
+                            "party_id": "10000",
+                            "local_id": "10000",
+                            "job_id": "31e9a1e53cff481fb208a8ecd5c9c1f0"
+                        }
+                    },
+                    "bond_account": "admin",
+                    "bond_dag_task_id": "187",
+                    "bond_hdfs_username": "hdfs",
+                    "table_name": "hFK5fL1874323cae4b496fb498f33636a177c1",
+                    "col_desc": {
+                        "y_desc": [],
+                        "id_desc": [
+                            "id"
+                        ]
+                    },
+                    "bond_kms_addr": "http://10.57.239.33:18088",
+                    "missing_values": [
+                        -999
+                    ],
+                    "bond_hdfs_url": "10.58.14.10:50070",
+                    "bond_dag_task_uuid": "31e9a1e53cff481fb208a8ecd5c9c1f0",
+                    "bond_org_code": "TongDun"
+                },
+                "sec_param": {
+                    "he_algo": "paillier",
+                    "he_key_length": 1024,
+                    "key_exchange_size": 2048
+                }
+            },
+            "name": "data_clean_op",
+            "module": "MockDataCleanOperator",
+            "launcher": {
+                "input": {
+                    "data_id": "bond.sample_align_op_data_id_2b323fa1774411ebb2ea0242ac11c204"
+                },
+                "output": {
+                    "data": "bond.data_clean_op_data_2b2fbcbb774411ebb2ea0242ac11c204",
+                    "data_desc": "bond.data_clean_op_data_desc_2b2fbce7774411ebb2ea0242ac11c204"
+                }
+            }
+        }
+    ],
+    "middleware": {
+        "engine": "light",
+        "warehouse": "/home/tdops/deploy/data",
+        "bulletin": {
+            "report_url": "http://10.58.14.13:8089",
+            "bond_monitor_id": "932",
+            "bond_dag_task_id": "187"
+        }
+    },
+    "communication": {
+        "server": "10.58.14.13:6001",
+        "session": {
+            "role": "host",
+            "party_id": "10000",
+            "local_id": "10000",
+            "job_id": "31e9a1e53cff481fb208a8ecd5c9c1f0"
+        },
+        "federation": {
+            "host": [
+                "10000"
+            ],
+            "guest": [
+                "10001"
+            ],
+            "coordinator": [
+                "9999"
+            ]
+        }
+    },
+    "meta": {
+        "timestamp": 1614242024,
+        "creator": "admin"
+    }
+}

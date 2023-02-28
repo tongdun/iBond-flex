@@ -10,3 +10,17 @@ scikit_learn==0.23.2
 secrets==1.0.2
 torch==1.6.0
 tensorflow==2.2.0
+grpcio==1.31.0
+grpcio-tools==1.31.0
+cython
+pyyaml
+sklearn
+requests>=2.22.0
+pyarrow
+pandas
+pyspark
+numpy
+retrying
+bson
+tinygrad
+

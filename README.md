@@ -22,6 +22,9 @@ FLEX protocol overview
 
 This project realizes these two parts, mentioned by the FLEX white paper. As for the communication part, we use the Ionic Bond protocol interface, developed by Tongdun AI Research Group, as the practice interface. It only gives you a simple implementation as a reference.
 
+## :fire New feature
+Current ibond_flex realease a new project called Caffeine, it is a federated learning algorithm library based on FLEX protocol
+
 ## Installation tutorial
 
 FLEX protocol can be run directly with the source code. It supports Python 3.6 or any higher version and is available for environment variable settings.

@@ -1,0 +1,59 @@
+
+version: 1
+disable_existing_loggers: False
+formatters:
+  deploy:
+    format: "%(asctime)s %(levelname)s %(name)s %(message)s"
+  detail:
+    format: "%(asctime)s %(levelname)s %(name)s %(filename)s:L%(lineno)d %(message)s"
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: deploy
+    stream: ext://sys.stdout
+
+  debug_file_handler:
+    class: logging.handlers.RotatingFileHandler
+    level: DEBUG
+    formatter: detail
+    filename: ${log_dir}/debug.log
+    maxBytes: 1048576000 # 1000MB
+    backupCount: 10
+    encoding: utf8
+
+  info_file_handler:
+    class: logging.handlers.RotatingFileHandler
+    level: INFO
+    formatter: detail
+    filename: ${log_dir}/info.log
+    maxBytes: 1048576000 # 1000MB
+    backupCount: 10
+    encoding: utf8
+
+  warning_file_handler:
+    class: logging.handlers.RotatingFileHandler
+    level: WARNING
+    formatter: detail
+    filename: ${log_dir}/warning.log
+    backupCount: 10
+    encoding: utf8
+
+  error_file_handler:
+    class: logging.handlers.RotatingFileHandler
+    level: ERROR
+    formatter: detail
+    filename: ${log_dir}/errors.log
+    backupCount: 10
+    encoding: utf8
+
+#loggers:
+#  "app":
+#    level: INFO
+#    handlers: [console, debug_file_handler, info_file_handler, warning_file_handler, error_file_handler]
+#    propagate: no
+
+root:
+  level: DEBUG
+  handlers: [console, debug_file_handler, info_file_handler, warning_file_handler, error_file_handler]

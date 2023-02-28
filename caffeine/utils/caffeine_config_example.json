@@ -1,0 +1,51 @@
+{
+    "version": "0.1",
+    "audit_switch": false,
+    "log_dir": "/mnt/nfs/tmp/caffeine/logs/",
+    "middleware_version": "light",
+    "security_config": {
+        "he_otp_lr_ft2": [
+            [
+                "paillier",
+                {
+                    "key_length": 1024
+                }
+            ]
+        ],
+        "he_lr_fp": [
+            [
+                "paillier",
+                {
+                    "key_length": 1024
+                }
+            ]
+        ],
+        "otp_sa_ft": [
+            [
+                "onetime_pad",
+                {
+                    "key_length": 512
+                }
+            ]
+        ],
+        "otp_pn_fl": null,
+        "otp_nn_ft": null,
+        "he_gb_ft": [
+            [
+                "paillier",
+                {
+                    "key_length": 1024
+                }
+            ]
+        ],
+        "he_gb_fp": null,
+        "ss_lsvm_ft": [
+            [
+                "secret_sharing",
+                {
+                    "precision": 4
+                }
+            ]
+        ]
+    }
+}

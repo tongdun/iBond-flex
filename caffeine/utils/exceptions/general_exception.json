@@ -1,0 +1,34 @@
+{
+  "ArgumentError": {
+    "name": "argument error",
+    "code": "exp_argument"
+  },
+  "ShapeMismatchError": {
+    "name": "shape mismatch error",
+    "code": "exp_shape_mismatch"
+  },
+  "DataCheckError": {
+    "name": "data check error",
+    "code": "exp_data_check"
+  },
+  "UninitializedError": {
+    "name": "uninitialized error",
+    "code": "exp_uninitialized"
+  },
+  "ParseError": {
+    "name": "parse error",
+    "code": "exp_parse"
+  },
+  "UnKnownError": {
+    "name": "unknown error",
+    "code": "exp_unknown"
+  },
+  "StrategyError": {
+    "name": "strategy error",
+    "code": "exp_strategy"
+  },
+  "LossTypeError": {
+  "name": "loss type error",
+  "code": "exp_loss_type"
+  }
+}

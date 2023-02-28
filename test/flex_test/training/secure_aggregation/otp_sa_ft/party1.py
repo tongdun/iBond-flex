@@ -1,0 +1,26 @@
+import random
+
+import numpy as np
+
+from flex.api import make_protocol
+from flex.constants import OTP_SA_FT
+from flex_test.fed_config_example import fed_conf_guest1
+
+
+def test():
+    theta = [
+        [np.random.uniform(-1, 1, (2, 4)).astype(np.float32), np.random.uniform(-1, 1, (2, 6)).astype(np.float32)],
+        [np.random.uniform(-1, 1, (2, 8)).astype(np.float32)]]
+    print(theta)
+
+    federal_info = fed_conf_guest1
+
+    sec_param = [('onetime_pad', {"key_length": 512})]
+
+    trainer = make_protocol(OTP_SA_FT, federal_info, sec_param, None)
+    result = trainer.exchange(theta)
+    print(result)
+
+
+if __name__ == '__main__':
+    test()

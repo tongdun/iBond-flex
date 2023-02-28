@@ -1,0 +1,10 @@
+{
+  "EmptyDataError": {
+    "name": "empty error",
+    "code": "exp_empty"
+  },
+  "DataMismatchError": {
+    "name": "data mismatch error",
+    "code": "exp_data_mismatch"
+  }
+}
